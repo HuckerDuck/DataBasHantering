@@ -7,6 +7,7 @@
     <groupId>se.fredrik.databashantering</groupId>
     <artifactId>DataBasHantering</artifactId>
     <version>1.0-SNAPSHOT</version>
+    
 
     <properties>
         <maven.compiler.source>23</maven.compiler.source>
