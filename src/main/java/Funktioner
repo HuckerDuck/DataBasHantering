@@ -1,0 +1,27 @@
+            //! Kod för att lägga till i Person person tabellen
+
+            //? String sql = "INSERT INTO Person.person(first_name, last_name, gender, dob, income) " +
+            //?        "VALUES ('John', 'Doe', 'M', '1985-06-15', 55000.00)";
+            //? int rowsAffected = statement.executeUpdate(sql);
+            //? System.out.println("Rader påverkade: " + rowsAffected);
+
+            //!  Kod för att uppdatera i tabellen
+
+            //? String updateSQL = "UPDATE Person.person SET income = income * 1.1 WHERE last_name = 'Doe'";
+            //? int rowsUpdated = statement.executeUpdate(updateSQL);
+            //? System.out.println("Rows updated: " + rowsUpdated);
+
+
+            Sammanfattning
+
+            . Skapa ett Statement genom att anropa createStatement() på din
+            databasanslutning.
+
+            . Använd executeUpdate() för SQL-satser som förändrar data (INSERT, UPDATE,
+            DELETE).
+
+            . Använd executeQuery() för SQL-satser som hämtar data (SELECT).
+
+            . Kom ihåg att alltid stänga Statement, ResultSet och Connection efter användning.
+            Med Statement kan du köra SQL direkt, men för mer komplexa scenarier, som att skydda
+            mot SQL-injektioner, bör du använda PreparedStatement.

@@ -9,7 +9,7 @@ public class Main {
 
     public static void main(String[] args) {
         Connection connection = null;
-        Statement statement = null;
+        Statement statement;
 
         try {
             // Etablera anslutning till databasen
@@ -18,13 +18,49 @@ public class Main {
 
             //! Skapa ett statement
             statement = connection.createStatement();
-            String query = "Select * from Books.books";
+
+            //! Kod för att lägga till i Person person tabellen
+
+            //? String sql = "INSERT INTO Person.person(first_name, last_name, gender, dob, income) " +
+            //?        "VALUES ('John', 'Doe', 'M', '1985-06-15', 55000.00)";
+            //? int rowsAffected = statement.executeUpdate(sql);
+            //? System.out.println("Rader påverkade: " + rowsAffected);
+
+            //! Kod för att uppdatera i tabellen
+
+            //? String updateSQL = "UPDATE Person.person SET income = income * 1.1 WHERE last_name = 'Doe'";
+            //? int rowsUpdated = statement.executeUpdate(updateSQL);
+            //? System.out.println("Rows updated: " + rowsUpdated);
+
+            //! Hämta d;ata från person-tabellen
+            String query = "SELECT * FROM Person.person";
             ResultSet resultSet = statement.executeQuery(query);
             while (resultSet.next()) {
-                System.out.println(resultSet.getString("title"));
+                //! Hämta Integer värde
+                int personID = resultSet.getInt("person_id");
+                System.out.println("ID: " + personID);
+
+                //! Hämta sträng värdet
+                String firstName = resultSet.getString("first_Name");
+                String lastName = resultSet.getString("last_Name");
+                String gender = resultSet.getString("gender");
+
+                System.out.println("First Name: " + firstName);
+                System.out.println("Last Name: " + lastName);
+                System.out.println("Gender: " + gender);
+
+                //! Hämta datum
+                java.sql.Date dob = resultSet.getDate("dob");
+
+                System.out.println("Date of birth: " + dob);
+
+                //! Hämta inkomst
+
+                double income = resultSet.getDouble("income");
+
+                System.out.println("Income: " + income);
+                System.out.println();
             }
-
-
 
             //! Stäng resurser
             statement.close();
