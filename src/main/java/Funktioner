@@ -25,3 +25,9 @@
             . Kom ihåg att alltid stänga Statement, ResultSet och Connection efter användning.
             Med Statement kan du köra SQL direkt, men för mer komplexa scenarier, som att skydda
             mot SQL-injektioner, bör du använda PreparedStatement.
+
+            Operation                           Metod                        Beskrivning
+            Skicka data	                 executeUpdate()	              Används för INSERT, UPDATE, och DELETE.
+            Hämta data	                 executeQuery()	                  Används för SELECT-frågor.
+            Sätt parametrar	             setX(index, value)	              Används i PreparedStatement för att sätta värden.
+            Hämta resultat	             ResultSet.getX(columnName)	      Hämta data från en specifik kolumn.

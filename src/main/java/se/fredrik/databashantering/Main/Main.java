@@ -1,23 +1,35 @@
 package se.fredrik.databashantering.Main;
+import com.mysql.cj.protocol.Resultset;
+import se.fredrik.databashantering.Tools.JDBCUtil;
+
 import java.sql.*;
 
 public class Main {
-    // JDBC URL, användarnamn och lösenord
-    private static final String DATABASE_URL = "jdbc:mysql://mysql-database.cbco6m888qzn.eu-central-1.rds.amazonaws.com:3306/";
-    private static final String DATABASE_USER = "admin";
-    private static final String DATABASE_PASSWORD = "abc12345";
 
     public static void main(String[] args) {
-        Connection connection = null;
-        Statement statement;
+        //! Används för att koppla sig till servern senare
+        Connection conn = null;
+        //! Vanligt Statement
+        Statement stmt = null;
+        //! PreparedStatement
+        PreparedStatement pStmt = null;
+        //! ResultSet behövs bara om vi hämtar data från databasen (SELECT:s)
+        ResultSet rs = null;
 
         try {
-            // Etablera anslutning till databasen
-            connection = DriverManager.getConnection(DATABASE_URL, DATABASE_USER, DATABASE_PASSWORD);
+            //! Sträng som används vid hämtning
+            String query = "SELECT * FROM Person.person";
+
+            //! Etablera anslutning till databasen
+            conn = JDBCUtil.getConnection();
             System.out.println("Anslutningen till databasen lyckades!");
 
+            //! Hämta produktnamn som ping-test
+            String productName = JDBCUtil.getDatabaseProductName();
+            System.out.println("Databasproduktnamn: " + productName); //! Skriver ut: "Databasproduktnamn: MySQL"
+
             //! Skapa ett statement
-            statement = connection.createStatement();
+            pStmt = conn.prepareStatement(query);
 
             //! Kod för att lägga till i Person person tabellen
 
@@ -32,53 +44,27 @@ public class Main {
             //? int rowsUpdated = statement.executeUpdate(updateSQL);
             //? System.out.println("Rows updated: " + rowsUpdated);
 
-            //! Hämta d;ata från person-tabellen
-            String query = "SELECT * FROM Person.person";
-            ResultSet resultSet = statement.executeQuery(query);
-            while (resultSet.next()) {
-                //! Hämta Integer värde
-                int personID = resultSet.getInt("person_id");
-                System.out.println("ID: " + personID);
+            //! Hämta data från person-tabellen
 
-                //! Hämta sträng värdet
-                String firstName = resultSet.getString("first_Name");
-                String lastName = resultSet.getString("last_Name");
-                String gender = resultSet.getString("gender");
-
-                System.out.println("First Name: " + firstName);
-                System.out.println("Last Name: " + lastName);
-                System.out.println("Gender: " + gender);
-
-                //! Hämta datum
-                java.sql.Date dob = resultSet.getDate("dob");
-
-                System.out.println("Date of birth: " + dob);
-
-                //! Hämta inkomst
-
-                double income = resultSet.getDouble("income");
-
-                System.out.println("Income: " + income);
-                System.out.println();
+            try (ResultSet resultSet = pStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    System.out.println();
+                    System.out.println(resultSet.getString(1));
+                    System.out.println(resultSet.getString("First_name"));
+                    System.out.println(resultSet.getString("Last_name"));
+                    System.out.println(resultSet.getString("gender"));
+                    System.out.println(resultSet.getString("dob"));
+                    System.out.println(resultSet.getString("income"));
+                }
             }
 
             //! Stäng resurser
-            statement.close();
+            pStmt.close();
 
         } catch (SQLException e) {
             System.err.println("Fel vid anslutning eller körning av SQL: " + e.getMessage());
         }
 
-        //! Stänger ner servern när jag är klar
-        finally {
-            try {
-                if (connection != null) {
-                    connection.close();
-                    System.out.println("Anslutningen är stängd.");
-                }
-            } catch (SQLException e) {
-                System.err.println("Fel vid stängning av anslutningen: " + e.getMessage());
-            }
-        }
+        JDBCUtil.closeConnection(conn);
     }
 }
