@@ -92,4 +92,18 @@ public class JDBCUtil {
         //! Returnera produktnamnet
         return metaData.getDatabaseProductName();
     }
+
+    //! Metod för att lägga till i Databasen
+    public static void insertPerson(String firstName, String lastName, String gender, String dob, double income) throws SQLException {
+        String insertSQL = "INSERT INTO Person.person(first_name, last_name, gender, dob, income) VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = getConnection(); PreparedStatement insertStmt = conn.prepareStatement(insertSQL)) {
+            insertStmt.setString(1, firstName);
+            insertStmt.setString(2, lastName);
+            insertStmt.setString(3, gender);
+            insertStmt.setDate(4, Date.valueOf(dob));
+            insertStmt.setDouble(5, income);
+            int rowsAffected = insertStmt.executeUpdate();
+            System.out.println("Ny post tillagd i Person.person-tabellen. Antal påverkade rader: " + rowsAffected);
+        }
+    }
 }
