@@ -7,10 +7,18 @@ public class JDBCUtil {
 
     //! Attribut för att koppla mig mot servern
 
-    private static final String DATABASE_URL = "jdbc:mysql://mysql-database.cbco6m888qzn.eu-central-1.rds.amazonaws.com:3306/Person";
+    private static final String DATABASE_URL = "jdbc:mysql://mysql-database.cbco6m888qzn.eu-central-1.rds.amazonaws.com";
     private static final String DATABASE_USER = "admin";
     private static final String DATABASE_PASSWORD = "abc12345";
-    private static Connection conn;
+    public static Connection conn;
+
+    public static Connection getTestConnection() throws SQLException {
+        String database_URL = "jdbc:h2:mem:testdb;";
+        String USER = "sa";      //? Standard användare för H2 databasen
+        String PASSWORD = "sa"; //? Standard lösenord för H2 databasen
+
+        return DriverManager.getConnection(database_URL, USER, PASSWORD);
+    }
 
     //! Metod för att hämta en anslutning
     public static Connection getConnection() throws SQLException {
@@ -33,6 +41,7 @@ public class JDBCUtil {
     //! För att skicka data används INSERT, UPDATE eller DELETE
     //! Kan vara ett Statement eller PreparedStatement
     //! PreparedStatement är bättre mot SQL-Attacker
+
     public static void closeStatement(Statement stmt) {
         try {
             if (stmt != null) {
@@ -82,7 +91,8 @@ public class JDBCUtil {
     public static String getDatabaseProductName() throws SQLException{
         //! Starta anslutningen om den inte redan finns:
 
-        if (conn == null){
+        //! Kontroller är kopplingen är null eller stängd innan man använder den i metoder
+        if (conn == null || conn.isClosed()) {
             conn = DriverManager.getConnection(DATABASE_URL, DATABASE_USER, DATABASE_PASSWORD);
         }
 
@@ -91,19 +101,5 @@ public class JDBCUtil {
 
         //! Returnera produktnamnet
         return metaData.getDatabaseProductName();
-    }
-
-    //! Metod för att lägga till i Databasen
-    public static void insertPerson(String firstName, String lastName, String gender, String dob, double income) throws SQLException {
-        String insertSQL = "INSERT INTO Person.person(first_name, last_name, gender, dob, income) VALUES (?, ?, ?, ?, ?)";
-        try (Connection conn = getConnection(); PreparedStatement insertStmt = conn.prepareStatement(insertSQL)) {
-            insertStmt.setString(1, firstName);
-            insertStmt.setString(2, lastName);
-            insertStmt.setString(3, gender);
-            insertStmt.setDate(4, Date.valueOf(dob));
-            insertStmt.setDouble(5, income);
-            int rowsAffected = insertStmt.executeUpdate();
-            System.out.println("Ny post tillagd i Person.person-tabellen. Antal påverkade rader: " + rowsAffected);
-        }
     }
 }

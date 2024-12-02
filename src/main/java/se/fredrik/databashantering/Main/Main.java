@@ -1,101 +1,70 @@
 package se.fredrik.databashantering.Main;
+import se.fredrik.databashantering.DAO.PersonDAOImpl;
+import se.fredrik.databashantering.Person.Person;
 import se.fredrik.databashantering.Tools.JDBCUtil;
-
-import java.sql.*;
+import se.fredrik.databashantering.Tools.SimpleText;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Scanner;
 
 public class Main {
-
     public static void main(String[] args) {
-        //! Används för att koppla sig till servern senare
-        Connection conn = null;
-        //! PreparedStatement
-        PreparedStatement pStmt;
-        //! ResultSet behövs bara om vi hämtar data från databasen (SELECT:s)
-        ResultSet rs = null;
+        boolean running = true;
+        Scanner scanner = new Scanner(System.in);
 
-        try {
-            //! Sträng som används vid hämtning
-            String query = "SELECT * FROM Person.person";
+        try (Connection connection = JDBCUtil.getConnection()){
 
-            //! Etablera anslutning till databasen
-            conn = JDBCUtil.getConnection();
-            System.out.println("Anslutningen till databasen lyckades!");
+            //! Skapa en instans av din DAO-klass här
+            //! Den använder sig av kopplingen till databasen
+            PersonDAOImpl personDAO = new PersonDAOImpl(connection);
 
-            //! Hämta produktnamn som ping-test
-            String productName = JDBCUtil.getDatabaseProductName();
-            System.out.println("Databasproduktnamn: " + productName); //! Skriver ut: "Databasproduktnamn: MySQL"
+            while (running) {
+                SimpleText.introText();
+                String choice = scanner.nextLine();
+                switch (choice) {
+                    case "1" ->{ //! Hämta alla personer i Person.person tabellen
+                        try {
+                            List<Person> persons = personDAO.getPersons();
 
-            //! Skapa ett PreparedStatement
-            pStmt = conn.prepareStatement(query);
+                            for (Person person : persons) {
+                                System.out.println("ID: " + person.getPersonID());
+                                System.out.println("Förnamn: " + person.getFirstName());
+                                System.out.println("Efternamn: " + person.getLastName());
+                                System.out.println("Kön " + person.getGender());
+                                System.out.println("Födelsedatatum" + person.getDob());
+                                System.out.println("Inkomst " + person.getIncome());
+                                System.out.println("____________________________________");
+                            }
 
-            //! Kod för att lägga till i Person tabellen
+                            if (persons.isEmpty()){
+                                System.out.println("Hittade inga personer i denna databas");
+                            }
 
-            //? try {
-            //?               JDBCUtil.insertPerson("Fredrik", "Menot Brauer", "M", "1992-12-15", 00000.00);
-            //?            } catch (SQLException e) {
-            //?                System.err.println("Fel vid infogning i databasen: " + e.getMessage());
-            //?            }
+                        }
 
-
-
-
-            //! Se typer av tabeller i databasen
-            ResultSetMetaData rsmd = pStmt.getMetaData();
-
-            //! Beskriv tabellen med en loop
-
-            int columnCount = rsmd.getColumnCount();
-            System.out.println("\n" + "Tabellstrukturen ");
-            int i;
-            for (i = 1; i <= columnCount; i++) {
-                String columnType = rsmd.getColumnTypeName(i);
-                System.out.print(columnType + " ");
-                int precision = rsmd.getPrecision(i);
-                System.out.print(precision + " ");
+                        catch (SQLException e)
+                        {
+                            System.err.println("Fel vid hämtning av personer : " + e.getMessage());
+                        }
+                    }
+                    case "2" ->{}
+                    case "3" ->{}
+                    case "4" ->{}
+                    case "5" ->{}
+                    case "6" -> running = false;
+                    default -> SimpleText.wrongChoiceNumber();
+                };
             }
-
-            //! Skriv ut en specifik Tabelltyp
-            int y = 1;
-            String columnOne = rsmd.getColumnName(y);
-            System.out.println("\n" + "\n" + "Kommulmn 1:" + columnOne);
-
-            //! Kod för att uppdatera i tabellen
-
-            //? String updateSQL = "UPDATE Person.person SET income = income * 1.1 WHERE last_name = 'Doe'";
-            //? int rowsUpdated = statement.executeUpdate(updateSQL);
-            //? System.out.println("Rows updated: " + rowsUpdated);
-
-            //! Hämta data från person-tabellen
-            //! Enkelt sätt
-
-            ResultSet resultSetFirstname = pStmt.executeQuery();
-            // Flytta till första raden
-            resultSetFirstname.next();
-            String firstName = resultSetFirstname.getString("First_name");
-            System.out.println("\n" + "Första namnet är: " + firstName);
-
-            //! Hämta data från person-tabellen
-            //! Try loop
-
-            try (ResultSet resultSet = pStmt.executeQuery()) {
-                while (resultSet.next()) {
-                    System.out.println();
-                    System.out.println("ID: " + resultSet.getString(1));
-                    System.out.println("First Name: " + resultSet.getString("First_name"));
-                    System.out.println("Last Name: " + resultSet.getString("Last_name"));
-                    System.out.println("Gender: " + resultSet.getString("Gender"));
-                    System.out.println("Date of Birth: " + resultSet.getString("dob"));
-                    System.out.println("Income: " + resultSet.getString("Income"));
-                }
-            }
-
-            //! Stäng resurser
-            pStmt.close();
-
-        } catch (SQLException e) {
-            System.err.println("Fel vid anslutning eller körning av SQL: " + e.getMessage());
         }
 
-        JDBCUtil.closeConnection(conn);
+        catch (SQLException e)
+        {
+            System.err.println("Fel vid anslutning till databasen: " + e.getMessage());
+        }
+
     }
 }
+
+
+
