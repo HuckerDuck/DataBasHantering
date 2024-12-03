@@ -1,15 +1,20 @@
 package se.fredrik.databashantering.Tools;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.*;
+import java.util.Properties;
 
 //! Hjälpklass för att koppla en mot servern
 public class JDBCUtil {
+    private static Properties properties = new Properties();
+
 
     //! Attribut för att koppla mig mot servern
 
-    private static final String DATABASE_URL = "jdbc:mysql://mysql-database.cbco6m888qzn.eu-central-1.rds.amazonaws.com";
-    private static final String DATABASE_USER = "admin";
-    private static final String DATABASE_PASSWORD = "abc12345";
+    private static final String DATABASE_URL;
+    private static final String DATABASE_USER;
+    private static final String DATABASE_PASSWORD;
     public static Connection conn;
 
     public static Connection getTestConnection() throws SQLException {
@@ -101,5 +106,23 @@ public class JDBCUtil {
 
         //! Returnera produktnamnet
         return metaData.getDatabaseProductName();
+    }
+
+    static {
+        try (InputStream input = JDBCUtil.class.getClassLoader().getResourceAsStream("properties")) {
+            if (input == null) {
+                throw new IOException("Unable to find application.properties");
+            }
+            properties.load(input);
+
+            // Load properties into constants
+            DATABASE_URL = properties.getProperty("db.url");
+            DATABASE_USER = properties.getProperty("db.user");
+            DATABASE_PASSWORD = properties.getProperty("db.password");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new ExceptionInInitializerError("Failed to load database properties");
+        }
     }
 }
